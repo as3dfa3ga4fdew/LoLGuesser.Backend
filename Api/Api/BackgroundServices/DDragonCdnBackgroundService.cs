@@ -11,9 +11,13 @@ namespace Api.BackgroundServices
             _dDragonCdnService = dDragonCdnService;
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            while (stoppingToken.IsCancellationRequested)
+            {
+
+                await Task.Delay(86400000); //Get and process data once a day.
+            }
         }
     }
 }
