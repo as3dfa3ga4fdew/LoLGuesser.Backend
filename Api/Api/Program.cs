@@ -1,3 +1,10 @@
+using Api.BackgroundServices;
+using Api.Clients;
+using Api.Clients.Interfaces;
+using Api.Contexts;
+using Api.Services;
+using Api.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api
 {
@@ -10,13 +17,26 @@ namespace Api
             // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<DataContext>(x =>
+            x.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+
+            //Clients
+            builder.Services.AddHttpClient<IDDragonCdnClient, DDragonCdnClient>();
+
+            //Background services
+            builder.Services.AddHostedService<DDragonCdnBackgroundService>();
+
+            //Services
+            builder.Services.AddSingleton<IDDragonCdnService, DDragonCdnService>();
+
+            //Repositories
+
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
