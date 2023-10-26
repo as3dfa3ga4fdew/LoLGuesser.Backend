@@ -15,6 +15,12 @@ namespace Api.BackgroundServices
         {
             while (stoppingToken.IsCancellationRequested)
             {
+                //Get version
+
+                //Get root
+
+                //Set root on DDragonCdnService
+
 
                 await Task.Delay(86400000); //Get and process data once a day.
             }

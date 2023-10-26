@@ -1,4 +1,6 @@
-﻿namespace Api.Models.DDragonClasses
+﻿using Api.Models.Classes;
+
+namespace Api.Models.DDragonClasses
 {
     public class Champion
     {

@@ -22,7 +22,6 @@ namespace Api.Clients
             }
             catch(Exception e)
             {
-                //log
                 return null;
             }
         }
@@ -35,7 +34,6 @@ namespace Api.Clients
             }
             catch (Exception e)
             {
-                //log
                 return null;
             }
         }
