@@ -2,60 +2,34 @@
 using Api.Models.Classes;
 using Api.Models.DDragonClasses;
 using Api.Services.Interfaces;
+using System.Collections.Immutable;
 
 namespace Api.Services
 {
     public class DDragonCdnService : IDDragonCdnService
     {
-        private readonly IDDragonCdnClient _dDragonCdnClient;
-        private Root? _root;
+        public IImmutableList<ParsedChampion>? ParsedChampions { get; set; }
 
-        public DDragonCdnService(IDDragonCdnClient dDragonCdnClient)
+        public DDragonCdnService() { }
+       
+        public void UpdateParsedChampions(IImmutableList<ParsedChampion> parsedChampions)
         {
-            _dDragonCdnClient = dDragonCdnClient;
-        }
-        public async Task UpdateAsync()
-        {
-            List<string> versions = await _dDragonCdnClient.GetVersionsAsync();
-            if (versions == null)
-                return;
+            if(parsedChampions == null)
+                throw new ArgumentNullException(nameof(parsedChampions));
 
-            Root root = await _dDragonCdnClient.GetDataAsync(versions[0]);
-            if(root == null) 
-                return;
+            if (parsedChampions.Count == 0)
+                throw new ArgumentOutOfRangeException(nameof(parsedChampions));
 
-            _root = root;
+            ParsedChampions = parsedChampions;
         }
 
-        public void SetRoot(Root root)
+        public ParsedChampion GetRandomParsedChampion()
         {
-            if (root == null)
-                throw new ArgumentNullException();
+            if (ParsedChampions == null) throw new InvalidOperationException(nameof(UpdateParsedChampions));
 
-            _root = root;
-        }
+            int pos = Random.Shared.Next(0, ParsedChampions.Count);
 
-        public Champion GetRandomChampion()
-        {
-            if (_root.Data == null)
-                return null;
-
-            int pos = Random.Shared.Next(0, _root.Data.Count);
-
-            Champion champion = _root.Data.Values.ToArray()[pos];
-
-            return champion;
-        }
-
-        public ParsedChampion ParseChampion(Champion champion, string version)
-        {
-           return new ParsedChampion()
-            {
-                Name = champion.Name,
-                RedactedLore = champion.Lore.Replace(champion.Name, "secret"),
-                SplashArtUrls = champion.Skins.Select(x => "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + champion.Name + "_" + x.Num + ".jpg").ToList(),
-                SpellUrls = champion.Spells.Select(x => "https://ddragon.leagueoflegends.com/cdn/"+version+"/img/spell/" + x.Id + ".png").ToList()
-            };
+            return ParsedChampions[pos];
         }
     }
 }

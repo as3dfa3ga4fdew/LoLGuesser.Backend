@@ -7,5 +7,6 @@ namespace Api.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
+
     }
 }

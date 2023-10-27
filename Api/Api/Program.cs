@@ -2,6 +2,7 @@ using Api.BackgroundServices;
 using Api.Clients;
 using Api.Clients.Interfaces;
 using Api.Contexts;
+using Api.Models.DDragonClasses;
 using Api.Services;
 using Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,7 @@ namespace Api
 
             //Services
             builder.Services.AddSingleton<IDDragonCdnService, DDragonCdnService>();
+
 
             //Repositories
 

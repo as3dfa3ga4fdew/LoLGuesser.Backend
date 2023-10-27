@@ -1,85 +1,75 @@
-﻿using Api.Clients;
-using Api.Clients.Interfaces;
-using Api.Models.DDragonClasses;
+﻿using Api.Models.Classes;
 using Api.Services;
 using Api.Services.Interfaces;
-using Moq;
-using Moq.Protected;
 using System;
-using System.Net;
-using System.Net.Http.Json;
-using System.Reflection;
+using System.Collections.Immutable;
 
 namespace UnitTests
 {
     public class DDragonCdnServiceTests
     {
-
         [Fact]
-        public async Task UpdateAsync_WhenSuccessful_ShouldSetRoot()
+        public void GetRandomParsedChampion_WhenParsedChampionsPropertyIsAssigned_ShouldReturnParsedChampion()
         {
-            Root mockRoot = new Root() { Version = "13.20.1" };
-            Mock<IDDragonCdnClient> mockDDragonCdnClient = new Mock<IDDragonCdnClient>();
-            mockDDragonCdnClient.Setup(client => client.GetVersionsAsync()).ReturnsAsync(new List<string> { "13.20.1" });
-            mockDDragonCdnClient.Setup(client => client.GetDataAsync("13.20.1")).ReturnsAsync(mockRoot);
+            //Arrange
+            IImmutableList<ParsedChampion> parsedChampions = new List<ParsedChampion>() { new ParsedChampion() { Name = "champion1" }, new ParsedChampion() { Name = "champion2" } }.ToImmutableList();
+            IDDragonCdnService iDDragonCdnService = new DDragonCdnService();
+            DDragonCdnService dDragonCdnService = (DDragonCdnService)iDDragonCdnService;
+            dDragonCdnService.ParsedChampions = parsedChampions;
 
-            IDDragonCdnService dDragonCdnService = new DDragonCdnService(mockDDragonCdnClient.Object);
-
-            // Act
-            await dDragonCdnService.UpdateAsync();
-
-            // Assert
-            var privateRoot = GetPrivateField<Root>(dDragonCdnService, "_root");
-            Assert.NotNull(privateRoot);
-            Assert.Same(mockRoot, privateRoot);
-        }
-
-        [Fact]
-        public async Task UpdateAsync_WhenGettingNullVersion_ShouldNotSetRoot()
-        {
-            Root mockRoot = new Root() { Version = "13.20.1" };
-            Mock<IDDragonCdnClient> mockDDragonCdnClient = new Mock<IDDragonCdnClient>();
-            mockDDragonCdnClient.Setup(client => client.GetVersionsAsync()).ReturnsAsync((List<string>)null);
-            mockDDragonCdnClient.Setup(client => client.GetDataAsync("13.20.1")).ReturnsAsync(mockRoot);
-
-            IDDragonCdnService dDragonCdnService = new DDragonCdnService(mockDDragonCdnClient.Object);
-
-            // Act
-            await dDragonCdnService.UpdateAsync();
-
+            //Act
+            ParsedChampion parsedChampion = iDDragonCdnService.GetRandomParsedChampion();
 
             //Assert
-            var privateRoot = GetPrivateField<Root>(dDragonCdnService, "_root");
-            Assert.Null(privateRoot);
+            Assert.NotNull(parsedChampion);
+            Assert.Contains(parsedChampion, parsedChampions);
         }
 
         [Fact]
-        public async Task UpdateAsync_WhenGettingNullData_ShouldNotSetRoot()
+        public void GetRandomParsedChampion_WhenParsedChampionsPropertyIsNotAssinged_ShouldThrowInvalidOperationException()
         {
-            
-            Mock<IDDragonCdnClient> mockDDragonCdnClient = new Mock<IDDragonCdnClient>();
-            mockDDragonCdnClient.Setup(client => client.GetVersionsAsync()).ReturnsAsync(new List<string>() { "13.20.1" });
-            mockDDragonCdnClient.Setup(client => client.GetDataAsync("13.20.1")).ReturnsAsync((Root)null);
+            //Arrange
+            IDDragonCdnService iDDragonCdnService = new DDragonCdnService();
 
-            IDDragonCdnService dDragonCdnService = new DDragonCdnService(mockDDragonCdnClient.Object);
+            //Act + Assert
+            Assert.Throws<InvalidOperationException>(iDDragonCdnService.GetRandomParsedChampion);
+        }
 
-            // Act
-            await dDragonCdnService.UpdateAsync();
+        [Fact]
+        public void UpdateParsedChampions_WhenGivenImmutableParsedChampionListWithItems_ShouldSetProperty()
+        {
+            //Arrange
+            IImmutableList<ParsedChampion> parsedChampions = new List<ParsedChampion>() { new ParsedChampion() { Name = "champion1" }, new ParsedChampion() { Name = "champion2" } }.ToImmutableList();
+            IDDragonCdnService iDDragonCdnService = new DDragonCdnService();
+
+            //Act
+            iDDragonCdnService.UpdateParsedChampions(parsedChampions);
 
             //Assert
-            var privateRoot = GetPrivateField<Root>(dDragonCdnService, "_root");
-            Assert.Null(privateRoot);
+            DDragonCdnService dDragonCdnService = (DDragonCdnService)iDDragonCdnService;
+            Assert.NotNull(dDragonCdnService.ParsedChampions);
+            Assert.Equal(dDragonCdnService.ParsedChampions, parsedChampions);
         }
 
-     
-        private static void SetPrivateField(object obj, string fieldName, object value)
+        [Fact]
+        public void UpdateParsedChampions_WhenGivenNull_ShouldThrowArgumentNullException()
         {
-            obj.GetType().GetProperty(fieldName).SetValue(obj, value);
+            //Arrange
+            IImmutableList<ParsedChampion> parsedChampions = null;
+            IDDragonCdnService iDDragonCdnService = new DDragonCdnService();
+
+            //Act + Assert
+            Assert.Throws<ArgumentNullException>(() => iDDragonCdnService.UpdateParsedChampions(parsedChampions));
         }
-        private static T GetPrivateField<T>(object obj, string fieldName)
+        [Fact]
+        public void UpdateParsedChampions_WhenGivenEmptyImmutableParsedChampionList_ShouldThrowArgumentOutOfRangeException()
         {
-            var fieldInfo = obj.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-            return (T)fieldInfo.GetValue(obj);
+            //Arrange
+            IImmutableList<ParsedChampion> parsedChampions = new List<ParsedChampion>().ToImmutableList();
+            IDDragonCdnService iDDragonCdnService = new DDragonCdnService();
+
+            //Act
+            Assert.Throws<ArgumentOutOfRangeException>(() => iDDragonCdnService.UpdateParsedChampions(parsedChampions));
         }
     }
 }
