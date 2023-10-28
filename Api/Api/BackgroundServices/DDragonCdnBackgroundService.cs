@@ -23,6 +23,7 @@ namespace Api.BackgroundServices
             {
                 try
                 {
+                    /*
                     //Get version && wait if failed
                     List<string> version = await _dDragonCdnClient.GetVersionsAsync();
                     if (version == null)
@@ -46,6 +47,7 @@ namespace Api.BackgroundServices
                     _dDragonCdnService.UpdateParsedChampions(parsedChampions);
 
                     await Task.Delay(86400000); //Get and process data once a day.
+                    */
                 }
                 catch (Exception e)
                 {

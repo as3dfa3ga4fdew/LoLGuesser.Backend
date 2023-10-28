@@ -5,36 +5,43 @@ namespace Api.Clients
 {
     public class DDragonCdnClient : IDDragonCdnClient
     {
-        private readonly HttpClient _httpClient;
+        private HttpClient _httpClient;
 
         public DDragonCdnClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
-
-            httpClient.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
+            _httpClient.BaseAddress = new Uri("https://ddragon.leagueoflegends.com/");
         }
 
-        public async Task<Root> GetDataAsync(string version)
+        public async Task<bool> TryGetDataAsync(string version, Action<Root> result)
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<Root>("cdn/"+version+"/data/en_US/championFull.json");
+                Root data = await _httpClient.GetFromJsonAsync<Root>("cdn/" + version + "/data/en_US/championFull.json");
+
+                result(data);
+
+                return true;
             }
             catch(Exception e)
             {
-                return null;
+                return false;
             }
         }
 
-        public async Task<List<string>> GetVersionsAsync()
+        public async Task<bool> TryGetVersionsAsync(Action<List<string>> result)
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<List<string>>("api/versions.json");
+                List<string> data = await _httpClient.GetFromJsonAsync<List<string>>("api/versions.json");
+
+                result(data);
+
+                return true;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return null;
+                return false;
             }
         }
     }

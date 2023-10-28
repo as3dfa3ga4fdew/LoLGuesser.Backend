@@ -4,7 +4,7 @@ namespace Api.Clients.Interfaces
 {
     public interface IDDragonCdnClient
     {
-        public Task<Root> GetDataAsync(string version);
-        public Task<List<string>> GetVersionsAsync();
+        public Task<bool> TryGetVersionsAsync(Action<List<string>> result);
+        public Task<bool> TryGetDataAsync(string version, Action<Root> result);
     }
 }
