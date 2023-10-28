@@ -35,7 +35,6 @@ namespace Api
             //Services
             builder.Services.AddSingleton<IDDragonCdnService, DDragonCdnService>();
 
-
             //Repositories
 
 

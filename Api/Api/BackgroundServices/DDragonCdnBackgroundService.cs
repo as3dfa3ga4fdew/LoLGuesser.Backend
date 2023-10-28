@@ -21,17 +21,47 @@ namespace Api.BackgroundServices
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             int delay = 86400000; //1 day in ms
+            int shortDelay = 3600000; //1 hour in ms
+
             while (!stoppingToken.IsCancellationRequested)
             {
+                List<string> versions = null;
+                if(!await _dDragonCdnClient.TryGetVersionsAsync(x => versions = x))
+                {
+                    _logger.LogWarning("Could not get versions. Delaying for " + shortDelay + "ms.");
+                    await Task.Delay(shortDelay);
+                    continue;
+                }
+
+                Root root = null;
+                if(!await _dDragonCdnClient.TryGetDataAsync(versions[0], x => root = x))
+                {
+                    _logger.LogWarning("Could not get root. Delaying for " + shortDelay + "ms.");
+                    await Task.Delay(shortDelay);
+                    continue;
+                }
+
+                if (!root.TryConvertToImmutableParsedChampionList(out var parsedChampionList))
+                {
+                    _logger.LogWarning("Could not convert root to parsed champion list. Delaying for " + shortDelay + "ms.");
+                    await Task.Delay(shortDelay);
+                    continue;
+                }
+
                 try
                 {
-                    _logger.LogInformation("Data parsed, received and updated. Delaying for "+ delay +"ms.");
-                    await Task.Delay(86400000, stoppingToken); //Get and process data once a day.
+                    _dDragonCdnService.UpdateParsedChampions(parsedChampionList);
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
-                    _logger.LogError(nameof(e) + " " + e.Message);
+                    _logger.LogError(e, "Could not update DDragonCdnService. Delaying for " + shortDelay + "ms.");
+                    await Task.Delay(shortDelay);
+                    continue;
                 }
+               
+
+                _logger.LogInformation("Succesfully received, parsed and updated data. Delaying for " + delay + "ms.");
+                await Task.Delay(delay);
             }
         }
     }
