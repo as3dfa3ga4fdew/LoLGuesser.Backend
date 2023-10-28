@@ -10,48 +10,27 @@ namespace Api.BackgroundServices
     {
         private readonly IDDragonCdnService _dDragonCdnService;
         private readonly IDDragonCdnClient _dDragonCdnClient;
-
-        public DDragonCdnBackgroundService(IDDragonCdnService dDragonCdnService, IDDragonCdnClient dDragonCdnClient)
+        private readonly ILogger<DDragonCdnBackgroundService> _logger;
+        public DDragonCdnBackgroundService(IDDragonCdnService dDragonCdnService, IDDragonCdnClient dDragonCdnClient, ILogger<DDragonCdnBackgroundService> logger)
         {
             _dDragonCdnService = dDragonCdnService;
             _dDragonCdnClient = dDragonCdnClient;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (stoppingToken.IsCancellationRequested)
+            int delay = 86400000; //1 day in ms
+            while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    /*
-                    //Get version && wait if failed
-                    List<string> version = await _dDragonCdnClient.GetVersionsAsync();
-                    if (version == null)
-                    {
-                        await Task.Delay(1000000);
-                        continue;
-                    }
-
-                    //Get root && wait if failed
-                    Root root = await _dDragonCdnClient.GetDataAsync(version[0]);
-                    if (root == null)
-                    {
-                        await Task.Delay(1000000);
-                        continue;
-                    }
-
-                    //Parse
-                    IImmutableList<ParsedChampion> parsedChampions = root.ToImmutableParsedChampionList();
-
-                    //Set root on DDragonCdnService
-                    _dDragonCdnService.UpdateParsedChampions(parsedChampions);
-
-                    await Task.Delay(86400000); //Get and process data once a day.
-                    */
+                    _logger.LogInformation("Data parsed, received and updated. Delaying for "+ delay +"ms.");
+                    await Task.Delay(86400000, stoppingToken); //Get and process data once a day.
                 }
                 catch (Exception e)
                 {
-                    //Log
+                    _logger.LogError(nameof(e) + " " + e.Message);
                 }
             }
         }

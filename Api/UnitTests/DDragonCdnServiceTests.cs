@@ -61,6 +61,7 @@ namespace UnitTests
             //Act + Assert
             Assert.Throws<ArgumentNullException>(() => iDDragonCdnService.UpdateParsedChampions(parsedChampions));
         }
+
         [Fact]
         public void UpdateParsedChampions_WhenGivenEmptyImmutableParsedChampionList_ShouldThrowArgumentOutOfRangeException()
         {
