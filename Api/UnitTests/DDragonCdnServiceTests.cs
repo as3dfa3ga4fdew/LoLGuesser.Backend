@@ -9,6 +9,31 @@ namespace UnitTests
     public class DDragonCdnServiceTests
     {
         [Fact]
+        public void GetChampionNames_WhenParsedChampionsPropertyIsAssigned_ShouldReturnIImmutableList()
+        {
+            //Arrange
+            IImmutableList<ParsedChampion> parsedChampions = new List<ParsedChampion>() { new ParsedChampion() { Name = "champion1" }, new ParsedChampion() { Name = "champion2" } }.ToImmutableList();
+            IDDragonCdnService iDDragonCdnService = new DDragonCdnService();
+            DDragonCdnService dDragonCdnService = (DDragonCdnService)iDDragonCdnService;
+            dDragonCdnService.ParsedChampions = parsedChampions;
+
+            //Act
+            IImmutableList<string> champions = iDDragonCdnService.GetChampionNames();
+
+            //Assert
+            Assert.NotNull(champions);
+            Assert.Equal(2, champions.Count);
+        }
+        [Fact]
+        public void GetChampionNames_WhenParsedChampionsPropertyIsNotAssinged_ShouldThrowInvalidOperationException()
+        {
+            //Arrange
+            IDDragonCdnService iDDragonCdnService = new DDragonCdnService();
+
+            //Act + Assert
+            Assert.Throws<InvalidOperationException>(iDDragonCdnService.GetChampionNames);
+        }
+        [Fact]
         public void GetRandomParsedChampion_WhenParsedChampionsPropertyIsAssigned_ShouldReturnParsedChampion()
         {
             //Arrange

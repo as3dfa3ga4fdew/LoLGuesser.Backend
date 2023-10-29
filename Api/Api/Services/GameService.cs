@@ -3,6 +3,7 @@ using Api.Models.Dtos;
 using Api.Models.Enums;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Immutable;
 
 namespace Api.Services
 {
@@ -15,6 +16,24 @@ namespace Api.Services
         {
             _dDragonCdnService = dDragonCdnService;
             _logger = logger;
+        }
+
+        public IActionResult GetChampionNames()
+        {
+            IImmutableList<string> names = null;
+            try
+            {
+                names = _dDragonCdnService.GetChampionNames();
+            }
+            catch(Exception e)
+            {
+                _logger.LogError("DDragonCdnService has not receieved data yet.");
+                ObjectResult result = new ObjectResult("");
+                result.StatusCode = 500;
+                return result;
+            }
+
+            return new OkObjectResult(names);
         }
 
         public IActionResult GetQuestion(QuestionType questionType)

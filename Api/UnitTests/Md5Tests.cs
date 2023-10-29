@@ -27,11 +27,22 @@ namespace UnitTests
         }
 
         [Fact]
-        public void Hash_WhenAnyInputIsNull_ShouldThrowArgumentNullException()
+        public void Hash_WhenPepperIsNull_houldThrowArgumentNullException()
         {
             //Arrange
             string value = "";
             string pepper = null;
+            Md5 md5 = new Md5();
+
+            //Act + Assert
+            Assert.Throws<ArgumentNullException>(() => md5.Hash(value, pepper));
+        }
+        [Fact]
+        public void Hash_WhenValueIsNull_ShouldThrowArgumentNullException()
+        {
+            //Arrange
+            string value = null;
+            string pepper = "";
             Md5 md5 = new Md5();
 
             //Act + Assert

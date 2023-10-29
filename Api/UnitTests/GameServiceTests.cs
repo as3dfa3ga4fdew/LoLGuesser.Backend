@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,49 @@ namespace UnitTests
 {
     public class GameServiceTests
     {
+        [Fact]
+        public void GetChampionNames_WhenSuccess_ShouldReturnIActionResultOkWithImmutableList()
+        {
+            //Arrange
+            Mock<ILogger<GameService>> loggerMock = new Mock<ILogger<GameService>>();
+            Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
+            iDDragonCdnService.Setup(x => x.GetChampionNames()).Returns(new List<string>().ToImmutableList<string>());
+            
+            GameService gameService = new GameService(iDDragonCdnService.Object, loggerMock.Object);
+
+            //Act
+            IActionResult result = gameService.GetChampionNames();
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(result);
+
+            OkObjectResult okObjectResult = result as OkObjectResult;
+
+            Assert.IsAssignableFrom<IImmutableList<string>>(okObjectResult.Value);
+        }
+
+        [Fact]
+        public void GetChampionNames_WhenDDragonCdnServiceFails_ShouldReturnIActionResultObjectResultWith500StatusCode()
+        {
+            //Arrange
+            Mock<ILogger<GameService>> loggerMock = new Mock<ILogger<GameService>>();
+            Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
+            iDDragonCdnService.Setup(x => x.GetChampionNames()).Throws<InvalidOperationException>();
+
+            GameService gameService = new GameService(iDDragonCdnService.Object, loggerMock.Object);
+
+            //Act
+            IActionResult result = gameService.GetChampionNames();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.IsType<ObjectResult>(result);
+
+            ObjectResult objectResult = result as ObjectResult;
+
+            Assert.Equal(objectResult.StatusCode, 500);
+        }
         [Theory]
         [InlineData(QuestionType.Lore)]
         [InlineData(QuestionType.Splash)]
@@ -75,7 +119,7 @@ namespace UnitTests
             Assert.IsType<BadRequestResult>(result);
         }
         [Fact]
-        public void GetQuestion__WhenDDragonCdnServiceFails_ShouldReturnIActionResultObjectResultWith500StatusCode()
+        public void GetQuestion_WhenDDragonCdnServiceFails_ShouldReturnIActionResultObjectResultWith500StatusCode()
         {
             //Arrange
             Mock<ILogger<GameService>> loggerMock = new Mock<ILogger<GameService>>();

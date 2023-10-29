@@ -27,7 +27,7 @@ namespace Api.Models.DDragonClasses
                     string redactedLore = champion.Lore.Replace(champion.Name, champion.Lore.Replace(champion.Name, "secret"));
                     parsedChampion.RedactedLore = new KeyValuePair<string, string>(md5.Hash("Lore", champion.Name), redactedLore);
 
-                    List<string> splashArtUrls = champion.Skins.Select(x => "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + x.Name + "_" + x.Num + ".jpg").ToList();
+                    List<string> splashArtUrls = champion.Skins.Select(x => "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + champion.Id + "_" + x.Num + ".jpg").ToList();
                     parsedChampion.SplashArtUrls = new KeyValuePair<string, List<string>>(md5.Hash("Splash", champion.Name), splashArtUrls);
 
                     List<string> spellUrls = champion.Spells.Select(x => "https://ddragon.leagueoflegends.com/cdn/" + Version + "/img/spell/" + x.Id + ".png").ToList();
@@ -46,5 +46,6 @@ namespace Api.Models.DDragonClasses
                 return false;
             }
         }
+
     }
 }

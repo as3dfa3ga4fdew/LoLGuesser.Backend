@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,28 @@ namespace UnitTests
 {
     public class GameControllerTests
     {
+        [Fact]
+        public async Task GetChampionNamesAsync_WhenSuccess_ShouldReturnIActionResultOkWithImmutableList()
+        {
+            //Arrange
+            Mock<IGameService> iGameServiceMock = new Mock<IGameService>();
+            iGameServiceMock.Setup(x => x.GetChampionNames()).Returns(new OkObjectResult(new List<string>().ToImmutableList()));
+
+            GameController gameController = new GameController(iGameServiceMock.Object);
+
+            //Act
+            IActionResult result = gameController.GetChampionNamesAsync();
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(result);
+
+            OkObjectResult okObjectResult = result as OkObjectResult;
+
+            Assert.NotNull(okObjectResult);
+            Assert.IsAssignableFrom<IImmutableList<string>>(okObjectResult.Value);
+        }
+
         [Fact]
         public async Task GetQuestionAsync_WhenValidSchema_ShouldReturnIActionResultOKWithQuestionDto()
         {
@@ -28,7 +51,7 @@ namespace UnitTests
             //Act
             IActionResult result = gameController.GetQeuestionAsync(questionSchema);
 
-            //Arrange
+            //Assert
             Assert.NotNull(result);
             Assert.IsType<OkObjectResult>(result);
 
@@ -46,10 +69,12 @@ namespace UnitTests
 
             GameController gameController = new GameController(iGameServiceMock.Object);
 
+            gameController.ModelState.AddModelError("","");
+
             //Act
             IActionResult result = gameController.GetQeuestionAsync(null);
 
-            //Arrange
+            //Assert
             Assert.NotNull(result);
             Assert.IsType<BadRequestResult>(result);
         }

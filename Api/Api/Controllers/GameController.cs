@@ -16,7 +16,13 @@ namespace Api.Controllers
             _gameService = gameService;
         }
 
-        [HttpPost("/question")]
+        [HttpGet("names")]
+        public IActionResult GetChampionNamesAsync()
+        {
+            return _gameService.GetChampionNames();
+        }
+
+        [HttpPost("question")]
         public IActionResult GetQeuestionAsync(QuestionSchema questionSchema)
         {
             if (!ModelState.IsValid)

@@ -5,6 +5,7 @@ namespace Api.Services.Interfaces
 {
     public interface IGameService
     {
+        public IActionResult GetChampionNames();
         public IActionResult GetQuestion(QuestionType questionType);
     }
 }

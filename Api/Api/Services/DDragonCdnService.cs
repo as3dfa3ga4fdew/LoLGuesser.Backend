@@ -31,5 +31,12 @@ namespace Api.Services
 
             return ParsedChampions[pos];
         }
+
+        public IImmutableList<string> GetChampionNames()
+        {
+            if (ParsedChampions == null) throw new InvalidOperationException(nameof(UpdateParsedChampions));
+
+            return ParsedChampions.Select(x => x.Name).ToImmutableList();
+        }
     }
 }
