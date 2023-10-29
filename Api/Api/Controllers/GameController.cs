@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Api.Models.Schemas;
+using Api.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -7,6 +9,20 @@ namespace Api.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
+        private readonly IGameService _gameService;
 
+        public GameController(IGameService gameService)
+        {
+            _gameService = gameService;
+        }
+
+        [HttpPost("/question")]
+        public IActionResult GetQeuestionAsync(QuestionSchema questionSchema)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            return _gameService.GetQuestion(questionSchema.Type);
+        }
     }
 }
