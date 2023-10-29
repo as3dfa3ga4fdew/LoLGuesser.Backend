@@ -17,7 +17,7 @@ namespace UnitTests
     public class DDragonCdnBackgroundServiceTests
     {
         /*
-            Skippar för att det är mer ett integrations test än ett unit test. 
+            Too hard to test since it has a 1 day delay
          */
     }
 }

@@ -26,7 +26,7 @@ namespace UnitTests
             GameController gameController = new GameController(iGameServiceMock.Object);
 
             //Act
-            IActionResult result = gameController.GetChampionNamesAsync();
+            IActionResult result = await gameController.GetChampionNamesAsync();
 
             //Assert
             Assert.NotNull(result);
@@ -49,7 +49,7 @@ namespace UnitTests
             GameController gameController = new GameController(iGameServiceMock.Object);
 
             //Act
-            IActionResult result = gameController.GetQeuestionAsync(questionSchema);
+            IActionResult result = await gameController.GetQeuestionAsync(questionSchema);
 
             //Assert
             Assert.NotNull(result);
@@ -72,7 +72,7 @@ namespace UnitTests
             gameController.ModelState.AddModelError("","");
 
             //Act
-            IActionResult result = gameController.GetQeuestionAsync(null);
+            IActionResult result = await gameController.GetQeuestionAsync(null);
 
             //Assert
             Assert.NotNull(result);

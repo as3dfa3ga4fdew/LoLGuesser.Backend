@@ -17,13 +17,13 @@ namespace Api.Controllers
         }
 
         [HttpGet("names")]
-        public IActionResult GetChampionNamesAsync()
+        public async Task<IActionResult> GetChampionNamesAsync()
         {
             return _gameService.GetChampionNames();
         }
 
         [HttpPost("question")]
-        public IActionResult GetQeuestionAsync(QuestionSchema questionSchema)
+        public async Task<IActionResult> GetQeuestionAsync(QuestionSchema questionSchema)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
