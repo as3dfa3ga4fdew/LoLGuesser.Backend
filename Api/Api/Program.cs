@@ -16,6 +16,7 @@ namespace Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddCors();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -39,7 +40,9 @@ namespace Api
 
 
             var app = builder.Build();
-
+            
+            app.UseCors(x => x.WithOrigins("https://localhost:5000", "http://localhost:3000").WithHeaders("content-type", "authorization"));
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
