@@ -24,9 +24,6 @@ namespace Api.Repositories
         }
         public async Task<bool> CreateAsync(UserEntity user)
         {
-            if (await GetByUsernameAsync(user.Username) != null)
-                return false;
-
             try
             {
                 await _context.Users.AddAsync(user);
@@ -38,6 +35,21 @@ namespace Api.Repositories
                 return false;
             }
             
+            return true;
+        }
+        public async Task<bool> UpdateAsync(UserEntity user)
+        {
+            try
+            {
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, " UpdateAsync");
+                return false;
+            }
+
             return true;
         }
     }

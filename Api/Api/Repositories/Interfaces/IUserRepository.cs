@@ -6,5 +6,6 @@ namespace Api.Repositories.Interfaces
     {
         public Task<UserEntity?> GetByUsernameAsync(string username);
         public Task<bool> CreateAsync(UserEntity user);
+        public Task<bool> UpdateAsync(UserEntity user);
     }
 }
