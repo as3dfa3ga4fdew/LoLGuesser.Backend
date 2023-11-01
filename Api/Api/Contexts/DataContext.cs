@@ -10,6 +10,7 @@ namespace Api.Contexts
         public DataContext() { }
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
+            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -19,8 +20,9 @@ namespace Api.Contexts
                 user.HasIndex(u => u.Username)
                 .IsUnique();
             });
-        }
 
-        public DbSet<UserEntity> Users { get; set; }
+            
+        }
+        public virtual DbSet<UserEntity> Users { get; set; }
     }
 }

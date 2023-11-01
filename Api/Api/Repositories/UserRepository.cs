@@ -46,7 +46,7 @@ namespace Api.Repositories
             }
             catch (Exception e)
             {
-                _logger.LogError(e, " UpdateAsync");
+                _logger.LogError(e, "CreateAsync");
                 return false;
             }
 

@@ -3,6 +3,8 @@ using Api.Clients;
 using Api.Clients.Interfaces;
 using Api.Contexts;
 using Api.Models.DDragonClasses;
+using Api.Repositories;
+using Api.Repositories.Interfaces;
 using Api.Services;
 using Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +41,7 @@ namespace Api
             builder.Services.AddSingleton<IJwtService, JwtService>();
 
             //Repositories
-
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             var app = builder.Build();
             

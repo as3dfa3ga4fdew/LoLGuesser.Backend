@@ -9,20 +9,25 @@ namespace Api.Services
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<JwtService> _logger;
         private readonly SymmetricSecurityKey _symmetricSecurityKey;
         private readonly SigningCredentials _signingCredentials;
         private readonly string _key;
         private readonly string _issuer;
 
-        public JwtService(IConfiguration configuration)
+        public JwtService(IConfiguration configuration, ILogger<JwtService> logger)
         {
             _configuration = configuration;
+            _logger = logger;
 
             _key = _configuration["Jwt:Key"];
             _issuer = _configuration["Jwt:Issuer"];
 
-            if(string.IsNullOrEmpty(_key) || string.IsNullOrEmpty(_issuer))
+            if (string.IsNullOrEmpty(_key) || string.IsNullOrEmpty(_issuer))
+            {
+                _logger.LogError("Missing keys in appsettings.json");
                 throw new InvalidOperationException();
+            }
 
             _symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             _signingCredentials = new SigningCredentials(_symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
