@@ -48,7 +48,6 @@ namespace Api.BackgroundServices
                     continue;
                 }
 
-
                 try
                 {
                     _dDragonCdnService.UpdateParsedChampions(parsedChampionList);

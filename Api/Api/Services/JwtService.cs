@@ -9,13 +9,13 @@ namespace Api.Services
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<JwtService> _logger;
+        private readonly ILogger<IJwtService> _logger;
         private readonly SymmetricSecurityKey _symmetricSecurityKey;
         private readonly SigningCredentials _signingCredentials;
         private readonly string _key;
         private readonly string _issuer;
 
-        public JwtService(IConfiguration configuration, ILogger<JwtService> logger)
+        public JwtService(IConfiguration configuration, ILogger<IJwtService> logger)
         {
             _configuration = configuration;
             _logger = logger;

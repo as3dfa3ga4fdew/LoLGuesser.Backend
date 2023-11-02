@@ -37,7 +37,7 @@ namespace UnitTests
         public void Username_WhenShortUsername_ShouldReturnFalse()
         {
             //Arrange
-            string username = "Short";
+            string username = "User";
 
             //Act
             bool result = Validate.Username(username);
@@ -121,7 +121,7 @@ namespace UnitTests
         public void Password_WhenMissingCharacterSets_ShouldReturnFalse()
         {
             // Arrange
-            var password = "OnlyLetters";
+            var password = "Password";
 
             // Act
             var result = Validate.Password(password);
