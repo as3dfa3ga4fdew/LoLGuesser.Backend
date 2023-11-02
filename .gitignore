@@ -298,3 +298,5 @@ UnitTests/TestResults/
 UnitTests/tools/
 ApiTests/TestResults/
 ApiTests/tools/
+coverlet.runsettings
+reportgenerator.exe

@@ -58,7 +58,6 @@ namespace Api.BackgroundServices
                     await Task.Delay(shortDelay);
                     continue;
                 }
-               
 
                 _logger.LogInformation("Succesfully received, parsed and updated data. Delaying for " + delay + "ms.");
                 await Task.Delay(delay);

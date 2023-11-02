@@ -3,6 +3,8 @@ using Api.Clients;
 using Api.Clients.Interfaces;
 using Api.Contexts;
 using Api.Models.DDragonClasses;
+using Api.Repositories;
+using Api.Repositories.Interfaces;
 using Api.Services;
 using Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,7 @@ namespace Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddCors();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -34,12 +37,16 @@ namespace Api
 
             //Services
             builder.Services.AddSingleton<IDDragonCdnService, DDragonCdnService>();
-
+            builder.Services.AddScoped<IGameService, GameService>();
+            builder.Services.AddSingleton<IJwtService, JwtService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
             //Repositories
-
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             var app = builder.Build();
-
+            
+            app.UseCors(x => x.WithOrigins("https://localhost:5000", "http://localhost:3000").WithHeaders("content-type", "authorization"));
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
