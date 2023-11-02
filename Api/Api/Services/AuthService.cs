@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace Api.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly IJwtService _jwtService;
         private readonly IUserRepository _userRepository;

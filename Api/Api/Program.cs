@@ -39,7 +39,7 @@ namespace Api
             builder.Services.AddSingleton<IDDragonCdnService, DDragonCdnService>();
             builder.Services.AddScoped<IGameService, GameService>();
             builder.Services.AddSingleton<IJwtService, JwtService>();
-
+            builder.Services.AddScoped<IAuthService, AuthService>();
             //Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
