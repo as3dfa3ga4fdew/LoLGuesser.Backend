@@ -29,7 +29,7 @@ namespace UnitTests
             Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
             iDDragonCdnService.Setup(x => x.GetChampionNames()).Returns(new List<string>().ToImmutableList<string>());
             
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>());
 
             //Act
             IActionResult result = gameService.GetChampionNames();
@@ -51,7 +51,7 @@ namespace UnitTests
             Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
             iDDragonCdnService.Setup(x => x.GetChampionNames()).Throws<InvalidOperationException>();
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, iLoggerMock.Object, It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, iLoggerMock.Object);
 
             //Act
             IActionResult result = gameService.GetChampionNames();
@@ -83,7 +83,7 @@ namespace UnitTests
                     }
                 );
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>());
 
             //Act
             IActionResult result = gameService.GetQuestion(questionType);
@@ -108,7 +108,7 @@ namespace UnitTests
             Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
             iDDragonCdnService.Setup(x => x.GetRandomParsedChampion()).Returns(It.IsAny<ParsedChampion>());
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>());
 
             //Act
             IActionResult result = gameService.GetQuestion(invalidType);
@@ -125,7 +125,7 @@ namespace UnitTests
             Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
             iDDragonCdnService.Setup(x => x.GetRandomParsedChampion()).Throws<InvalidOperationException>();
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, iLoggerMock.Object, It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, iLoggerMock.Object);
 
             //Act
             IActionResult result = gameService.GetQuestion(QuestionType.Lore);
@@ -152,7 +152,7 @@ namespace UnitTests
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySplashId(It.IsAny<string>(), out parsedChampion)).Returns(true);
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySpellId(It.IsAny<string>(), out parsedChampion)).Returns(true);
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>());
 
             //Act
             IActionResult result = gameService.VerifyAnswer(schema);
@@ -183,7 +183,7 @@ namespace UnitTests
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySplashId(It.IsAny<string>(), out parsedChampion)).Returns(true);
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySpellId(It.IsAny<string>(), out parsedChampion)).Returns(true);
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>());
 
             //Act
             IActionResult result = gameService.VerifyAnswer(schema);
@@ -207,7 +207,7 @@ namespace UnitTests
             AnswerSchema schema = new AnswerSchema() { Id = It.IsAny<string>(), Type = (QuestionType)50, Answer = It.IsAny<string>() };
             Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>());
 
             //Act
             IActionResult result = gameService.VerifyAnswer(schema);
@@ -238,7 +238,7 @@ namespace UnitTests
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySplashId(It.IsAny<string>(), out parsedChampion)).Returns(false);
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySpellId(It.IsAny<string>(), out parsedChampion)).Returns(false);
 
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>());
 
             //Act
             IActionResult result = gameService.VerifyAnswer(schema);
@@ -269,7 +269,7 @@ namespace UnitTests
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySplashId(It.IsAny<string>(), out parsedChampion)).Throws<InvalidOperationException>();
             iDDragonCdnService.Setup(x => x.GetParsedChampionBySpellId(It.IsAny<string>(), out parsedChampion)).Throws<InvalidOperationException>();
             
-            GameService gameService = new GameService(iDDragonCdnService.Object, iLoggerMock.Object, It.IsAny<IUserRepository>());
+            GameService gameService = new GameService(iDDragonCdnService.Object, iLoggerMock.Object);
 
             //Act
             IActionResult result = gameService.VerifyAnswer(schema);
@@ -281,34 +281,6 @@ namespace UnitTests
             ObjectResult objectResult = result as ObjectResult;
 
             Assert.Equal(objectResult.StatusCode, 500);
-        }
-        [Theory]
-        [InlineData(QuestionType.Spell)]
-        [InlineData(QuestionType.Splash)]
-        [InlineData(QuestionType.Lore)]
-        public async Task VerifyAnswerAndUpdateScoreAsync_WhenValidSchemaAndAnswer_ShouldReturnIActionResultOkAndUpdateUserScore(QuestionType type)
-        {
-            //Arrange
-            string username = "user";
-            UserEntity userEntity = new UserEntity() { Score = 0 };
-            AnswerSchema schema = new AnswerSchema() { Id = It.IsAny<string>(), Type = type, Answer = It.IsAny<string>() };
-            Mock<IUserRepository> iUserRepository = new Mock<IUserRepository>();
-            iUserRepository.Setup(x => x.GetByUsernameAsync(It.IsAny<string>())).ReturnsAsync(userEntity);
-            iUserRepository.Setup(x => x.UpdateAsync(It.IsAny<UserEntity>())).ReturnsAsync(true);
-
-            Mock<IDDragonCdnService> iDDragonCdnService = new Mock<IDDragonCdnService>();
-            ParsedChampion parsedChampion = new ParsedChampion() { Name = "1" };
-            iDDragonCdnService.Setup(x => x.GetParsedChampionByLoreId(It.IsAny<string>(), out parsedChampion)).Returns(true);
-            iDDragonCdnService.Setup(x => x.GetParsedChampionBySplashId(It.IsAny<string>(), out parsedChampion)).Returns(true);
-            iDDragonCdnService.Setup(x => x.GetParsedChampionBySpellId(It.IsAny<string>(), out parsedChampion)).Returns(true);
-
-            GameService gameService = new GameService(iDDragonCdnService.Object, It.IsAny<ILogger<IGameService>>(), iUserRepository.Object);
-
-            //Act
-            IActionResult actionResult = await gameService.VerifyAnswerAndUpdateScoreAsync(schema, username);
-
-            //Arrange
-
         }
     }
 }

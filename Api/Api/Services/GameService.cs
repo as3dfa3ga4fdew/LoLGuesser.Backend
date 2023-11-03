@@ -15,13 +15,11 @@ namespace Api.Services
     {
         private readonly ILogger<IGameService> _logger;
         private readonly IDDragonCdnService _dDragonCdnService;
-        private readonly IUserRepository _userRepository;
 
-        public GameService(IDDragonCdnService dDragonCdnService, ILogger<IGameService> logger, IUserRepository userRepository)
+        public GameService(IDDragonCdnService dDragonCdnService, ILogger<IGameService> logger)
         {
             _dDragonCdnService = dDragonCdnService;
             _logger = logger;
-            _userRepository = userRepository;
         }
 
         public IActionResult GetChampionNames()
@@ -118,36 +116,6 @@ namespace Api.Services
             answerDto.Correct = parsedChampion.Name == schema.Answer;
 
             return new OkObjectResult(answerDto);
-        }
-
-        public async Task<IActionResult> VerifyAnswerAndUpdateScoreAsync(AnswerSchema schema, string username)
-        {
-            IActionResult actionResult = VerifyAnswer(schema);
-            OkObjectResult result = actionResult as OkObjectResult;
-            if (result == null)
-                return actionResult;
-
-            AnswerDto answerDto = result.Value as AnswerDto;
-
-            if (answerDto.Correct == false)
-                return actionResult;
-
-            UserEntity user = await _userRepository.GetByUsernameAsync(username);
-            if(user == null)
-                return new UnauthorizedResult();
-
-            user.Score++;
-
-            if (await _userRepository.UpdateAsync(user))
-            {
-                ObjectResult objectResult = new ObjectResult("");
-                objectResult.StatusCode = 500;
-                return objectResult;
-            }
-
-            answerDto.Score = user.Score;
-
-            return actionResult;
         }
     }
 }

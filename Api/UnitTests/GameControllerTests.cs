@@ -78,5 +78,37 @@ namespace UnitTests
             Assert.NotNull(result);
             Assert.IsType<BadRequestResult>(result);
         }
+
+        [Fact]
+        public async Task VerifyGuestAnswerAsync_WhenValidAnswer_ShouldReturIActionResultOk()
+        {
+            //Arrange
+            AnswerDto answerDto = new AnswerDto() { Correct = true, Score = 0 };
+            Mock<IGameService> iGameServiceMock = new Mock<IGameService>();
+            iGameServiceMock.Setup(x => x.VerifyAnswer(It.IsAny<AnswerSchema>())).Returns(new OkObjectResult(answerDto));
+
+            GameController gameController = new GameController(iGameServiceMock.Object);
+
+            //Act
+            IActionResult result = await gameController.VerifyGuestAnswerAsync(It.IsAny<AnswerSchema>());
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(result);
+        }
+        [Fact]
+        public async Task VerifyGuestAnswerAsync_WhenInvalidSchema_ShouldReturnIActionResultBad()
+        {
+            //Arrange
+            GameController gameController = new GameController(It.IsAny<IGameService>());
+            gameController.ModelState.AddModelError("", "");
+
+            //Act
+            IActionResult result = await gameController.VerifyGuestAnswerAsync(It.IsAny<AnswerSchema>());
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.IsType<BadRequestResult>(result);
+        }
     }
 }

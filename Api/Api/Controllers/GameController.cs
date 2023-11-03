@@ -30,5 +30,14 @@ namespace Api.Controllers
 
             return _gameService.GetQuestion(questionSchema.Type);
         }
+
+        [HttpPost("answer/guest")]
+        public async Task<IActionResult> VerifyGuestAnswerAsync(AnswerSchema answerSchema)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            return _gameService.VerifyAnswer(answerSchema);
+        }
     }
 }
