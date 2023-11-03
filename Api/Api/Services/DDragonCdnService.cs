@@ -38,5 +38,26 @@ namespace Api.Services
 
             return ParsedChampions.Select(x => x.Name).ToImmutableList();
         }
+
+        public bool GetParsedChampionBySpellId(string id, out ParsedChampion parsedChampion)
+        {
+            if (ParsedChampions == null) throw new InvalidOperationException(nameof(UpdateParsedChampions));
+
+            return (parsedChampion = ParsedChampions.Where(x => x.SpellUrls.Key == id).FirstOrDefault()) != null;
+        }
+
+        public bool GetParsedChampionByLoreId(string id, out ParsedChampion parsedChampion)
+        {
+            if (ParsedChampions == null) throw new InvalidOperationException(nameof(UpdateParsedChampions));
+
+            return (parsedChampion = ParsedChampions.Where(x => x.RedactedLore.Key == id).FirstOrDefault()) != null;
+        }
+
+        public bool GetParsedChampionBySplashId(string id, out ParsedChampion parsedChampion)
+        {
+            if (ParsedChampions == null) throw new InvalidOperationException(nameof(UpdateParsedChampions));
+
+            return (parsedChampion = ParsedChampions.Where(x => x.SplashArtUrls.Key == id).FirstOrDefault()) != null;
+        }
     }
 }
