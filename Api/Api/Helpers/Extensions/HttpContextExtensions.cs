@@ -8,7 +8,7 @@ namespace Api.Helpers.Extensions
         public static Claim GetClaim(this HttpContext context, string type)
         {
             //Parse token
-            string jwt = context.Request.Headers.Authorization.ToString();
+            string jwt = context.Request.Headers.Authorization;
 
             if (jwt == null) return null;
 

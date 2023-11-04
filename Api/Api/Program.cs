@@ -7,7 +7,10 @@ using Api.Repositories;
 using Api.Repositories.Interfaces;
 using Api.Services;
 using Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Api
 {
@@ -29,6 +32,22 @@ namespace Api
             builder.Services.AddLogging(x =>
             x.AddConsole());
 
+            builder.Services
+              .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+              .AddJwtBearer(options =>
+              {
+                  options.TokenValidationParameters = new TokenValidationParameters
+                  {
+                      ValidateIssuer = true,
+                      ValidateAudience = true,
+                      ValidateLifetime = true,
+                      ValidateIssuerSigningKey = true,
+                      ValidIssuer = builder.Configuration.GetSection("Jwt").GetValue<string>("Issuer"),
+                      ValidAudience = builder.Configuration.GetSection("Jwt").GetValue<string>("Issuer"),
+                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt").GetValue<string>("Key")!))
+                  };
+              });
+
             //Clients
             builder.Services.AddHttpClient<IDDragonCdnClient, DDragonCdnClient>();
 
@@ -38,7 +57,7 @@ namespace Api
             //Services
             builder.Services.AddSingleton<IDDragonCdnService, DDragonCdnService>();
             builder.Services.AddScoped<IGameService, GameService>();
-            builder.Services.AddSingleton<IJwtService, JwtService>();
+            builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             //Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -55,8 +74,8 @@ namespace Api
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

@@ -78,5 +78,17 @@ namespace UnitTests
             //Assert
             Assert.Null(claim);
         }
+        [Fact]
+        public void GetClaim_WhenAuthorizationIsNull_ShouldReturnNull()
+        {
+            //Arrange
+            HttpContext context = new DefaultHttpContext();
+            
+            //Act
+            Claim claim = context.GetClaim(It.IsAny<string>());
+
+            //Assert
+            Assert.Null(claim);
+        }
     }
 }
