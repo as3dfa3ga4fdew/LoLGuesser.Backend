@@ -19,11 +19,14 @@ namespace Api.Services
 
         public string Create(List<Claim> claims)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            string key = _configuration["Jwt:Key"];
+            string issuer = _configuration["Jwt:Issuer"];
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
-              _configuration["Jwt:Issuer"],
+            var token = new JwtSecurityToken(issuer,
+              issuer,
               claims,
               expires: DateTime.Now.AddMinutes(1200),
               signingCredentials: credentials);
