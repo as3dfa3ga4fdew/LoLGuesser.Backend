@@ -40,7 +40,7 @@ namespace Api.Services
 
             LoginDto loginDto = new LoginDto();
             loginDto.Username = user.Username;
-            loginDto.Jwt = _jwtService.Create(new List<Claim>() { new Claim("username", schema.Username) });
+            loginDto.Jwt = _jwtService.Create(new List<Claim>() { new Claim("username", schema.Username), new Claim("id", user.Id.ToString()) });
             loginDto.Score = loginDto.Score;
 
             return new OkObjectResult(loginDto);

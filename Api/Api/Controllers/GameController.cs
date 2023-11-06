@@ -1,6 +1,6 @@
-﻿using Api.Helpers.Extensions;
-using Api.Models.Dtos;
+﻿using Api.Models.Dtos;
 using Api.Models.Entities;
+using Api.Models.Enums;
 using Api.Models.Schemas;
 using Api.Repositories.Interfaces;
 using Api.Services.Interfaces;
@@ -18,10 +18,12 @@ namespace Api.Controllers
     {
         private readonly IGameService _gameService;
         private readonly IUserRepository _userRepository;
-        public GameController(IGameService gameService, IUserRepository userRepository)
+        private readonly IJwtService _jwtService;
+        public GameController(IGameService gameService, IUserRepository userRepository, IJwtService jwtService)
         {
             _gameService = gameService;
             _userRepository = userRepository;
+            _jwtService = jwtService;
         }
 
         [HttpGet("names")]
@@ -55,9 +57,8 @@ namespace Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            Claim claim = HttpContext.GetClaim("username");
-            if (claim == null)
-                return BadRequest();
+            if(!_jwtService.TryGetClaim(HttpContext, "username", out Claim claim))
+                return BadRequest(new ErrorDto(ErrorType.MissingIdClaim));
 
             IActionResult result = _gameService.VerifyAnswer(schema);
 

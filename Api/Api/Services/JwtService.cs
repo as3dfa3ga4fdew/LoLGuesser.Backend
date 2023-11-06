@@ -9,12 +9,10 @@ namespace Api.Services
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<IJwtService> _logger;
 
-        public JwtService(IConfiguration configuration, ILogger<IJwtService> logger)
+        public JwtService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _logger = logger;
         }
 
         public string Create(List<Claim> claims)
@@ -32,6 +30,37 @@ namespace Api.Services
               signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public bool TryGetClaim(HttpContext context, string type, out Claim claim)
+        {
+            claim = null;
+
+            //Parse token
+            string jwt = context.Request.Headers.Authorization;
+
+            if (jwt == null) 
+                return false;
+
+            string[] jwtItems = jwt.Split("Bearer ");
+
+            if (jwtItems.Length != 2)
+                return false;
+
+            //Decode jwt token
+            JwtSecurityToken decodedToken = null;
+            try
+            {
+                decodedToken = new JwtSecurityToken(jwtItems[1]);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            claim = decodedToken.Claims.FirstOrDefault(c => c.Type == type);
+
+            return claim != null;
         }
     }
 }

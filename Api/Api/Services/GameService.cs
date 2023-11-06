@@ -98,7 +98,7 @@ namespace Api.Services
                         _dDragonCdnService.GetParsedChampionBySplashId(schema.Id, out parsedChampion);
                         break;
                     default:
-                        return new BadRequestObjectResult(new ErrorDto() { Error = "Invalid type" });
+                        return new BadRequestObjectResult(new ErrorDto(ErrorType.InvalidId));
                 }
             }
             catch(Exception e)
@@ -110,7 +110,7 @@ namespace Api.Services
             }
            
             if (parsedChampion == null)
-                return new BadRequestObjectResult(new ErrorDto() { Error = "Invalid id"});
+                return new BadRequestObjectResult(new ErrorDto(ErrorType.InvalidId));
 
             AnswerDto answerDto = new AnswerDto();
             answerDto.Correct = parsedChampion.Name == schema.Answer;

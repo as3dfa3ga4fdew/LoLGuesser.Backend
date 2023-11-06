@@ -2,6 +2,7 @@ using Api.BackgroundServices;
 using Api.Clients;
 using Api.Clients.Interfaces;
 using Api.Contexts;
+using Api.Middlewares;
 using Api.Models.DDragonClasses;
 using Api.Repositories;
 using Api.Repositories.Interfaces;
@@ -48,6 +49,9 @@ namespace Api
                   };
               });
 
+            //Middleware
+            builder.Services.AddScoped<ExceptionMiddleware>();
+
             //Clients
             builder.Services.AddHttpClient<IDDragonCdnClient, DDragonCdnClient>();
 
@@ -59,11 +63,15 @@ namespace Api
             builder.Services.AddScoped<IGameService, GameService>();
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IAddressService, AddressService>();
             //Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 
             var app = builder.Build();
-            
+
+            app.UseMiddleware<ExceptionMiddleware>();
+
             app.UseCors(x => x.WithOrigins("https://localhost:5000", "http://localhost:3000").WithHeaders("content-type", "authorization"));
             
             if (app.Environment.IsDevelopment())
