@@ -8,6 +8,7 @@ using Api.Repositories.Interfaces;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Immutable;
+using System.ComponentModel;
 
 namespace Api.Services
 {
@@ -22,41 +23,38 @@ namespace Api.Services
             _logger = logger;
         }
 
-        public IActionResult GetChampionNames()
+        public IEnumerable<string> GetChampionNames()
         {
-            IImmutableList<string> names = null;
-            try
-            {
-                names = _dDragonCdnService.GetChampionNames();
-            }
-            catch(Exception e)
-            {
-                _logger.LogError(e, "DDragonCdnService has not receieved data yet.");
-                ObjectResult result = new ObjectResult("");
-                result.StatusCode = 500;
-                return result;
-            }
-
-            return new OkObjectResult(names);
+            return _dDragonCdnService.GetChampionNames();
         }
 
-        public IActionResult GetQuestion(QuestionType questionType)
+        public bool Validate<TSchema>(TSchema schema)
         {
-            ParsedChampion parsedChampion;
-            try
+            if (schema == null)
+                return false;
+
+            switch (schema)
             {
-                parsedChampion = _dDragonCdnService.GetRandomParsedChampion();
+                case QuestionSchema questionSchema:
+                    if (!Enum.IsDefined(typeof(QuestionType), questionSchema.Type))
+                        return false;
+                    break;
+                case AnswerSchema answerSchema:
+                    if (string.IsNullOrEmpty(answerSchema.Answer) || !Enum.IsDefined(typeof(QuestionType), answerSchema.Type))
+                        return false;
+                    break;
+                default:
+                    throw new Exception(nameof(Validate));
             }
-            catch(Exception e)
-            {
-                _logger.LogError(e, "DDragonCdnService has not receieved data yet.");
-                ObjectResult result = new ObjectResult("");
-                result.StatusCode = 500;
-                return result;
-            }
-           
+
+            return true;
+        }
+
+        public QuestionDto GetQuestion(QuestionType questionType)
+        {
+            ParsedChampion parsedChampion = _dDragonCdnService.GetRandomParsedChampion();
             QuestionDto questionDto = new QuestionDto();
-            
+
             switch(questionType)
             {
                 case QuestionType.Lore:
@@ -75,47 +73,34 @@ namespace Api.Services
                     questionDto.Value = parsedChampion.SplashArtUrls.Value.ElementAt(Random.Shared.Next(0, parsedChampion.SplashArtUrls.Value.Count));
                     break;
                 default:
-                    return new BadRequestResult();
+                    throw new InvalidEnumArgumentException(nameof(GetQuestion));
             }
 
-            return new OkObjectResult(questionDto);
+            return questionDto;
         }
 
-        public IActionResult VerifyAnswer(AnswerSchema schema)
+        public bool VerifyAnswer(AnswerSchema schema)
         {
             ParsedChampion parsedChampion = null;
-            try
+            switch (schema.Type)
             {
-                switch (schema.Type)
-                {
-                    case QuestionType.Lore:
-                        _dDragonCdnService.GetParsedChampionByLoreId(schema.Id, out parsedChampion);
-                        break;
-                    case QuestionType.Spell:
-                        _dDragonCdnService.GetParsedChampionBySpellId(schema.Id, out parsedChampion);
-                        break;
-                    case QuestionType.Splash:
-                        _dDragonCdnService.GetParsedChampionBySplashId(schema.Id, out parsedChampion);
-                        break;
-                    default:
-                        return new BadRequestObjectResult(new ErrorDto(ErrorType.InvalidId));
-                }
+                case QuestionType.Lore:
+                    _dDragonCdnService.GetParsedChampionByLoreId(schema.Id, out parsedChampion);
+                    break;
+                case QuestionType.Spell:
+                    _dDragonCdnService.GetParsedChampionBySpellId(schema.Id, out parsedChampion);
+                    break;
+                case QuestionType.Splash:
+                    _dDragonCdnService.GetParsedChampionBySplashId(schema.Id, out parsedChampion);
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException(nameof(VerifyAnswer));
             }
-            catch(Exception e)
-            {
-                _logger.LogError(e, "DDragonCdnService has not receieved data yet.");
-                ObjectResult result = new ObjectResult("");
-                result.StatusCode = 500;
-                return result;
-            }
-           
+
             if (parsedChampion == null)
-                return new BadRequestObjectResult(new ErrorDto(ErrorType.InvalidId));
+                throw new KeyNotFoundException(nameof(VerifyAnswer) + " " + schema.Id);
 
-            AnswerDto answerDto = new AnswerDto();
-            answerDto.Correct = parsedChampion.Name == schema.Answer;
-
-            return new OkObjectResult(answerDto);
+            return schema.Answer == parsedChampion.Name;
         }
     }
 }

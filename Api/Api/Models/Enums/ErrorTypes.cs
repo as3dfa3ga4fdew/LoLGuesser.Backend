@@ -9,6 +9,8 @@
         MissingUsernameClaim = 4,
         InvalidGuid = 5,
         InvalidSchema = 6,
-        InvalidId = 7
+        InvalidId = 7,
+        InvalidCredentials = 8,
+        UsernameAlreadyTaken = 9
     }
 }

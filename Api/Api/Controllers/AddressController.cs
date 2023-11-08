@@ -101,7 +101,7 @@ namespace Api.Controllers
             if (!await _addressService.UpdateAsync(entity))
                 throw new Exception(nameof(PutAsync));
 
-            return Ok();
+            return Ok((AddressDto)entity);
         }
     }
 }

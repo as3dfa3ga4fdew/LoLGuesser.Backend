@@ -17,72 +17,75 @@ namespace Api.Controllers
     public class GameController : ControllerBase
     {
         private readonly IGameService _gameService;
-        private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
-        public GameController(IGameService gameService, IUserRepository userRepository, IJwtService jwtService)
+        private readonly IUserService _userService;
+        public GameController(IGameService gameService, IJwtService jwtService, IUserService userService)
         {
             _gameService = gameService;
-            _userRepository = userRepository;
             _jwtService = jwtService;
+            _userService = userService;
         }
 
         [HttpGet("names")]
         public async Task<IActionResult> GetChampionNamesAsync()
         {
-            return _gameService.GetChampionNames();
+            return Ok(_gameService.GetChampionNames());
         }
 
         [HttpPost("question")]
-        public async Task<IActionResult> GetQeuestionAsync(QuestionSchema questionSchema)
+        public async Task<IActionResult> GetQeuestionAsync(QuestionSchema schema)
         {
-            if (!ModelState.IsValid)
-                return BadRequest();
+            if(!ModelState.IsValid)
+                return BadRequest(new StatusDto(ErrorType.InvalidModel));
 
-            return _gameService.GetQuestion(questionSchema.Type);
-        }
+            if(!_gameService.Validate(schema))
+                return BadRequest(new StatusDto(ErrorType.InvalidSchema));
 
-        [HttpPost("answer/guest")]
-        public async Task<IActionResult> VerifyGuestAnswerAsync(AnswerSchema schema)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest();
-
-            return _gameService.VerifyAnswer(schema);
+            return Ok(_gameService.GetQuestion(schema.Type));
         }
 
         [HttpPost("answer")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> VerifyAnswerAsync(AnswerSchema schema)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
+                return BadRequest(new StatusDto(ErrorType.InvalidModel));
 
-            if(!_jwtService.TryGetClaim(HttpContext, "username", out Claim claim))
+            if (!_gameService.Validate(schema))
+                return BadRequest(new StatusDto(ErrorType.InvalidSchema));
+
+            AnswerDto answerDto = new AnswerDto() { Correct = false };
+
+            if (!_gameService.VerifyAnswer(schema))
+                return Ok(answerDto);
+
+            answerDto.Correct = true;
+
+            //Check if authed
+            if (!User.Identity.IsAuthenticated)
+                return Ok(answerDto);
+
+            //Parse token
+            if (!_jwtService.TryGetClaim(HttpContext, "id", out Claim claim))
                 return BadRequest(new ErrorDto(ErrorType.MissingIdClaim));
 
-            IActionResult result = _gameService.VerifyAnswer(schema);
+            if (!Guid.TryParse(claim.Value, out Guid userId))
+                return BadRequest(new ErrorDto(ErrorType.InvalidGuid));
 
-            OkObjectResult okObjectResult = result as OkObjectResult;
-            if (okObjectResult == null)
-                return result;
+            //Get user
+            UserEntity userEntity = await _userService.GetByIdAsync(userId);
+            if (userEntity == null)
+                throw new Exception(nameof(VerifyAnswerAsync) + " " + userId);
 
-            AnswerDto answer = okObjectResult.Value as AnswerDto;
+            userEntity.Score++;
+            
+            //Update user
+            if (!await _userService.UpdateAsync(userEntity))
+                throw new Exception(nameof(_userService.UpdateAsync));
 
-            if (!answer.Correct)
-                return result;
+            answerDto.Score = userEntity.Score;
 
-            UserEntity user = await _userRepository.GetByUsernameAsync(claim.Value);
-            if (user == null)
-                return Unauthorized();
-
-            user.Score++;
-
-            if (!await _userRepository.UpdateAsync(user))
-                return StatusCode(500);
-
-            answer.Score = user.Score;
-
-            return result;
+            return Ok(answerDto);
         }
     }
 }
