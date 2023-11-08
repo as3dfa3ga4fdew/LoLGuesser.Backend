@@ -10,10 +10,6 @@ namespace Api.Helpers
         { 
             _md5 = MD5.Create();
         }
-        ~Md5()
-        {
-            _md5.Dispose();
-        }
 
         public string Hash(string value, string pepper)
         {

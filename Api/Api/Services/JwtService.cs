@@ -3,47 +3,70 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Api.Exceptions;
 
 namespace Api.Services
 {
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<IJwtService> _logger;
-        private readonly SymmetricSecurityKey _symmetricSecurityKey;
-        private readonly SigningCredentials _signingCredentials;
-        private readonly string _key;
-        private readonly string _issuer;
 
-        public JwtService(IConfiguration configuration, ILogger<IJwtService> logger)
+        public JwtService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _logger = logger;
-
-            _key = _configuration["Jwt:Key"];
-            _issuer = _configuration["Jwt:Issuer"];
-
-            if (string.IsNullOrEmpty(_key) || string.IsNullOrEmpty(_issuer))
-            {
-                _logger.LogError("Missing keys in appsettings.json");
-                throw new InvalidOperationException();
-            }
-
-            _symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            _signingCredentials = new SigningCredentials(_symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
         }
 
         public string Create(List<Claim> claims)
         {
-            SecurityToken token = new JwtSecurityToken(
-                _issuer,
-                _issuer,
-                claims,
-                expires: DateTime.UtcNow.AddMinutes(120),
-                signingCredentials: _signingCredentials
-                );
+            string key = _configuration["Jwt:Key"];
+            if (key == null)
+                throw new MissingPropertyException(nameof(IConfiguration) + " " + nameof(key));
+
+            string issuer = _configuration["Jwt:Issuer"];
+            if(issuer == null)
+                throw new MissingPropertyException(nameof(IConfiguration) + " " + nameof(issuer));
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(issuer,
+              issuer,
+              claims,
+              expires: DateTime.Now.AddMinutes(1200),
+              signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public bool TryGetClaim(HttpContext context, string type, out Claim claim)
+        {
+            claim = null;
+
+            //Parse token
+            string jwt = context.Request.Headers.Authorization;
+
+            if (jwt == null) 
+                return false;
+
+            string[] jwtItems = jwt.Split("Bearer ");
+
+            if (jwtItems.Length != 2)
+                return false;
+
+            //Decode jwt token
+            JwtSecurityToken decodedToken = null;
+            try
+            {
+                decodedToken = new JwtSecurityToken(jwtItems[1]);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            claim = decodedToken.Claims.FirstOrDefault(c => c.Type == type);
+
+            return claim != null;
         }
     }
 }

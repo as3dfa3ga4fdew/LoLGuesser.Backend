@@ -19,10 +19,16 @@ namespace Api.Contexts
             {
                 user.HasIndex(u => u.Username)
                 .IsUnique();
+
+                user.HasMany(a => a.Addresses)
+                .WithOne(a => a.User)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
             });
 
-            
+          
         }
-        public virtual DbSet<UserEntity> Users { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
+        public DbSet<AddressEntity> Addresses { get; set; }
     }
 }

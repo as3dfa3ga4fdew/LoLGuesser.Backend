@@ -1,58 +1,58 @@
 ﻿using Api.Models.Classes;
 using Api.Models.Dtos;
+using Api.Models.Entities;
 using Api.Models.Enums;
+using Api.Models.Schemas;
+using Api.Repositories;
+using Api.Repositories.Interfaces;
 using Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Immutable;
+using System.ComponentModel;
 
 namespace Api.Services
 {
     public class GameService : IGameService
     {
-        private readonly ILogger<GameService> _logger;
         private readonly IDDragonCdnService _dDragonCdnService;
 
-        public GameService(IDDragonCdnService dDragonCdnService, ILogger<GameService> logger)
+        public GameService(IDDragonCdnService dDragonCdnService)
         {
             _dDragonCdnService = dDragonCdnService;
-            _logger = logger;
         }
 
-        public IActionResult GetChampionNames()
+        public IImmutableList<string> GetChampionNames()
         {
-            IImmutableList<string> names = null;
-            try
-            {
-                names = _dDragonCdnService.GetChampionNames();
-            }
-            catch(Exception e)
-            {
-                _logger.LogError("DDragonCdnService has not receieved data yet.");
-                ObjectResult result = new ObjectResult("");
-                result.StatusCode = 500;
-                return result;
-            }
-
-            return new OkObjectResult(names);
+            return _dDragonCdnService.GetChampionNames();
         }
 
-        public IActionResult GetQuestion(QuestionType questionType)
+        public bool Validate<TSchema>(TSchema schema)
         {
-            ParsedChampion parsedChampion;
-            try
+            if (schema == null)
+                return false;
+
+            switch (schema)
             {
-                parsedChampion = _dDragonCdnService.GetRandomParsedChampion();
+                case QuestionSchema questionSchema:
+                    if (!Enum.IsDefined(typeof(QuestionType), questionSchema.Type))
+                        return false;
+                    break;
+                case AnswerSchema answerSchema:
+                    if (string.IsNullOrEmpty(answerSchema.Answer) || !Enum.IsDefined(typeof(QuestionType), answerSchema.Type))
+                        return false;
+                    break;
+                default:
+                    throw new Exception(nameof(Validate));
             }
-            catch(Exception e)
-            {
-                _logger.LogError("DDragonCdnService has not receieved data yet.");
-                ObjectResult result = new ObjectResult("");
-                result.StatusCode = 500;
-                return result;
-            }
-           
+
+            return true;
+        }
+
+        public QuestionDto GetQuestion(QuestionType questionType)
+        {
+            ParsedChampion parsedChampion = _dDragonCdnService.GetRandomParsedChampion();
             QuestionDto questionDto = new QuestionDto();
-            
+
             switch(questionType)
             {
                 case QuestionType.Lore:
@@ -71,10 +71,55 @@ namespace Api.Services
                     questionDto.Value = parsedChampion.SplashArtUrls.Value.ElementAt(Random.Shared.Next(0, parsedChampion.SplashArtUrls.Value.Count));
                     break;
                 default:
-                    return new BadRequestResult();
+                    throw new InvalidEnumArgumentException(nameof(GetQuestion));
             }
 
-            return new OkObjectResult(questionDto);
+            return questionDto;
+        }
+
+        public bool VerifyAnswer(AnswerSchema schema)
+        {
+            ParsedChampion parsedChampion = null;
+            switch (schema.Type)
+            {
+                case QuestionType.Lore:
+                    _dDragonCdnService.GetParsedChampionByLoreId(schema.Id, out parsedChampion);
+                    break;
+                case QuestionType.Spell:
+                    _dDragonCdnService.GetParsedChampionBySpellId(schema.Id, out parsedChampion);
+                    break;
+                case QuestionType.Splash:
+                    _dDragonCdnService.GetParsedChampionBySplashId(schema.Id, out parsedChampion);
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException(nameof(VerifyAnswer));
+            }
+
+            if (parsedChampion == null)
+                throw new KeyNotFoundException(nameof(VerifyAnswer) + " " + schema.Id);
+
+            return schema.Answer == parsedChampion.Name;
+        }
+
+        public ParsedChampion? GetParsedChampionById(QuestionType type, string id)
+        {
+            ParsedChampion parsedChampion = null;
+            switch (type)
+            {
+                case QuestionType.Lore:
+                    _dDragonCdnService.GetParsedChampionByLoreId(id, out parsedChampion);
+                    break;
+                case QuestionType.Spell:
+                    _dDragonCdnService.GetParsedChampionBySpellId(id, out parsedChampion);
+                    break;
+                case QuestionType.Splash:
+                    _dDragonCdnService.GetParsedChampionBySplashId(id, out parsedChampion);
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException(nameof(VerifyAnswer));
+            }
+
+            return parsedChampion;
         }
     }
 }

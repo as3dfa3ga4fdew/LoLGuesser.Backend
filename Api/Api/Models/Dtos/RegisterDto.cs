@@ -2,10 +2,10 @@
 
 namespace Api.Models.Dtos
 {
-    public class RegisterDto
+    public class RegisterDto : Dto
     {
-        public string Jwt { get; set; } = null!;
         public string Username { get; set; } = null!;
         public int Score { get; set; }
+        public string Jwt { get; set; } = null!;
     }
 }

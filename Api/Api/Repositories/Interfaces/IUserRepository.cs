@@ -2,10 +2,8 @@
 
 namespace Api.Repositories.Interfaces
 {
-    public interface IUserRepository
+    public interface IUserRepository : IRepository<UserEntity>
     {
         public Task<UserEntity?> GetByUsernameAsync(string username);
-        public Task<bool> CreateAsync(UserEntity user);
-        public Task<bool> UpdateAsync(UserEntity user);
     }
 }
