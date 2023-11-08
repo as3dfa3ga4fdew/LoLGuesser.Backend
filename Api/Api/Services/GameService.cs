@@ -14,16 +14,14 @@ namespace Api.Services
 {
     public class GameService : IGameService
     {
-        private readonly ILogger<IGameService> _logger;
         private readonly IDDragonCdnService _dDragonCdnService;
 
-        public GameService(IDDragonCdnService dDragonCdnService, ILogger<IGameService> logger)
+        public GameService(IDDragonCdnService dDragonCdnService)
         {
             _dDragonCdnService = dDragonCdnService;
-            _logger = logger;
         }
 
-        public IEnumerable<string> GetChampionNames()
+        public IImmutableList<string> GetChampionNames()
         {
             return _dDragonCdnService.GetChampionNames();
         }
@@ -101,6 +99,27 @@ namespace Api.Services
                 throw new KeyNotFoundException(nameof(VerifyAnswer) + " " + schema.Id);
 
             return schema.Answer == parsedChampion.Name;
+        }
+
+        public ParsedChampion? GetParsedChampionById(QuestionType type, string id)
+        {
+            ParsedChampion parsedChampion = null;
+            switch (type)
+            {
+                case QuestionType.Lore:
+                    _dDragonCdnService.GetParsedChampionByLoreId(id, out parsedChampion);
+                    break;
+                case QuestionType.Spell:
+                    _dDragonCdnService.GetParsedChampionBySpellId(id, out parsedChampion);
+                    break;
+                case QuestionType.Splash:
+                    _dDragonCdnService.GetParsedChampionBySplashId(id, out parsedChampion);
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException(nameof(VerifyAnswer));
+            }
+
+            return parsedChampion;
         }
     }
 }

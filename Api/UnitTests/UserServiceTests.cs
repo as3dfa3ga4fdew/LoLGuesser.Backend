@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -262,6 +263,17 @@ namespace UnitTests
             //Assert
             Assert.False(result);
         }
+
+
+
+
+
+
+
+
+
+
+
         [Fact]
         public async Task HashPasswordAsync_WhenSuccess_ShouldReturnHashedString()
         {
@@ -276,5 +288,90 @@ namespace UnitTests
             Assert.Contains("$2a$04$", result);
         }
        
+
+
+
+
+
+
+
+
+
+
+
+        [Fact]
+        public async Task GetByIdAsync_WhenUserExists_ShouldReturnUserEntity()
+        {
+            //Arrange
+            UserEntity userEntity = new UserEntity() { Username = "username" };
+            Mock<IUserRepository> iUserRepository = new Mock<IUserRepository>();
+            iUserRepository.Setup(x => x.GetAsync(It.IsAny<Expression<Func<UserEntity, bool>>>())).ReturnsAsync(userEntity);
+
+            UserService userService = new UserService(iUserRepository.Object);
+
+            //Act
+            UserEntity result = await userService.GetByIdAsync(It.IsAny<Guid>());
+
+            //Assert
+            Assert.Equal(userEntity.Username, result.Username);
+        }
+        [Fact]
+        public async Task GetByIdAsync_WhenUserMissing_ShouldReturnNull()
+        {
+            //Arrange
+            Mock<IUserRepository> iUserRepository = new Mock<IUserRepository>();
+            iUserRepository.Setup(x => x.GetAsync(It.IsAny<Expression<Func<UserEntity, bool>>>())).ReturnsAsync((UserEntity)null);
+
+            UserService userService = new UserService(iUserRepository.Object);
+
+            //Act
+            UserEntity result = await userService.GetByIdAsync(It.IsAny<Guid>());
+
+            //Assert
+            Assert.Null(result);
+        }
+        [Fact]
+        public async Task UpdateAsync_WhenSuccess_ShouldReturnTrue()
+        {
+            //Arrange
+            UserEntity userEntity = new UserEntity() { Username = "username" };
+            Mock<IUserRepository> iUserRepository = new Mock<IUserRepository>();
+            iUserRepository.Setup(x => x.UpdateAsync(It.IsAny<UserEntity>())).ReturnsAsync(true);
+
+            UserService userService = new UserService(iUserRepository.Object);
+
+            //Act
+            bool result = await userService.UpdateAsync(userEntity);
+
+            //Assert
+            Assert.True(result);
+        }
+        [Fact]
+        public async Task UpdateAsync_WhenEntityIsNull_ShouldThrowArgumentNullException()
+        {
+            //Arrange
+            UserService userService = new UserService(It.IsAny<IUserRepository>());
+
+            //Act
+            await Assert.ThrowsAsync<ArgumentNullException>(() => userService.UpdateAsync(null));
+        }
+        [Fact]
+        public async Task UpdateAsync_WhenRepositoryFails_ShouldReturnFalse()
+        {
+            //Arrange
+            UserEntity userEntity = new UserEntity() { Username = "username" };
+            Mock<IUserRepository> iUserRepository = new Mock<IUserRepository>();
+            iUserRepository.Setup(x => x.UpdateAsync(It.IsAny<UserEntity>())).ReturnsAsync(false);
+
+            UserService userService = new UserService(iUserRepository.Object);
+
+            //Act
+            bool result = await userService.UpdateAsync(userEntity);
+
+            //Assert
+            Assert.False(result);
+        }
+
+
     }
 }

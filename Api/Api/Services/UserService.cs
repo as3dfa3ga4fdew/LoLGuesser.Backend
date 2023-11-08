@@ -86,6 +86,9 @@ namespace Api.Services
         
         public async Task<bool> UpdateAsync(UserEntity entity)
         {
+            if(entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
             return await _userRepository.UpdateAsync(entity);
         }
 

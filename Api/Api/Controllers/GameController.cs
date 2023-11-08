@@ -1,4 +1,5 @@
-﻿using Api.Models.Dtos;
+﻿using Api.Models.Classes;
+using Api.Models.Dtos;
 using Api.Models.Entities;
 using Api.Models.Enums;
 using Api.Models.Schemas;
@@ -27,13 +28,13 @@ namespace Api.Controllers
         }
 
         [HttpGet("names")]
-        public async Task<IActionResult> GetChampionNamesAsync()
+        public IActionResult GetChampionNames()
         {
             return Ok(_gameService.GetChampionNames());
         }
 
         [HttpPost("question")]
-        public async Task<IActionResult> GetQeuestionAsync(QuestionSchema schema)
+        public IActionResult GetQeuestion(QuestionSchema schema)
         {
             if(!ModelState.IsValid)
                 return BadRequest(new StatusDto(ErrorType.InvalidModel));
@@ -65,12 +66,14 @@ namespace Api.Controllers
             if (!User.Identity.IsAuthenticated)
                 return Ok(answerDto);
 
+            //
+
             //Parse token
             if (!_jwtService.TryGetClaim(HttpContext, "id", out Claim claim))
-                return BadRequest(new ErrorDto(ErrorType.MissingIdClaim));
+                return BadRequest(new StatusDto(ErrorType.MissingIdClaim));
 
             if (!Guid.TryParse(claim.Value, out Guid userId))
-                return BadRequest(new ErrorDto(ErrorType.InvalidGuid));
+                return BadRequest(new StatusDto(ErrorType.InvalidGuid));
 
             //Get user
             UserEntity userEntity = await _userService.GetByIdAsync(userId);
@@ -86,6 +89,21 @@ namespace Api.Controllers
             answerDto.Score = userEntity.Score;
 
             return Ok(answerDto);
+        }
+        [HttpGet("champion/{type}/{id}")]
+        public IActionResult GetChampionByTypeAndAndId(QuestionType type, Guid id)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new StatusDto(ErrorType.InvalidModel));
+
+            if (!Enum.IsDefined(typeof(QuestionType), type))
+                return BadRequest(new StatusDto(ErrorType.InvalidSchema));
+
+            ParsedChampion parsedChampion = _gameService.GetParsedChampionById(type, id.ToString());
+            if (parsedChampion == null)
+                return BadRequest(new StatusDto(ErrorType.InvalidId));
+
+            return Ok(parsedChampion);
         }
     }
 }
