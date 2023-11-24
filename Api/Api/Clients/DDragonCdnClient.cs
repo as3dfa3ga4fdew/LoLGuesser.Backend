@@ -18,13 +18,14 @@ namespace Api.Clients
             try
             {
                 Root data = await _httpClient.GetFromJsonAsync<Root>("cdn/" + version + "/data/en_US/championFull.json");
-
+                
                 result(data);
 
                 return true;
             }
             catch(Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }

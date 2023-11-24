@@ -12,8 +12,8 @@ namespace Api.Models.DDragonClasses
         public List<Skin> Skins { get; set; }
         public string Lore { get; set; }
         public string Blurb { get; set; }
-        public List<string> Allytips { get; set; }
-        public List<string> Enemytips { get; set; }
+        public List<string> AllyTips { get; set; }
+        public List<string> EnemyTips { get; set; }
         public List<string> Tags { get; set; }
         public string Partype { get; set; }
         public Info Info { get; set; }
